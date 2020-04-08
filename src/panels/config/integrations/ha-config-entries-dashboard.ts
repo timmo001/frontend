@@ -45,6 +45,8 @@ import { EntityRegistryEntry } from "../../../data/entity_registry";
 import { DataEntryFlowProgress } from "../../../data/data_entry_flow";
 import { showConfirmationDialog } from "../../../dialogs/generic/show-dialog-box";
 import { configSections } from "../ha-panel-config";
+import memoizeOne from "memoize-one";
+import * as Fuse from "fuse.js";
 
 @customElement("ha-config-entries-dashboard")
 export class HaConfigManagerDashboard extends LitElement {
@@ -67,6 +69,24 @@ export class HaConfigManagerDashboard extends LitElement {
    */
   @property() private configEntriesInProgress!: DataEntryFlowProgress[];
   @property() private _showIgnored = false;
+
+  private _filter?: string;
+
+  private _filterConfigEntries = memoizeOne(
+    (configEntries: ConfigEntry[], filter?: string) => {
+      if (filter) {
+        const options: Fuse.FuseOptions<ConfigEntry> = {
+          keys: ["entry_id", "domain", "title"],
+          caseSensitive: false,
+          minMatchCharLength: 2,
+          threshold: 0.2,
+        };
+        const fuse = new Fuse(configEntries, options);
+        return fuse.search(filter);
+      }
+      return configEntries;
+    }
+  );
 
   public connectedCallback() {
     super.connectedCallback();
@@ -190,57 +210,63 @@ export class HaConfigManagerDashboard extends LitElement {
           <span slot="header">
             ${this.hass.localize("ui.panel.config.integrations.configured")}
           </span>
+          <search-input
+            .filter=${this._filter}
+            no-label-float
+            @value-changed=${this._handleSearchChange}
+          ></search-input>
           <ha-card>
             ${this.entityRegistryEntries.length
-              ? this.configEntries.map((item: any, idx) =>
-                  item.source === "ignore"
-                    ? ""
-                    : html`
-                        <a
-                          href="/config/integrations/config_entry/${item.entry_id}"
-                        >
-                          <paper-item data-index=${idx}>
-                            <img
-                              src="https://brands.home-assistant.io/${item.domain}/icon.png"
-                              srcset="
-                                https://brands.home-assistant.io/${item.domain}/icon@2x.png 2x
-                              "
-                              referrerpolicy="no-referrer"
-                              @error=${this._onImageError}
-                              @load=${this._onImageLoad}
-                            />
-                            <paper-item-body two-line>
-                              <div>
-                                ${this.hass.localize(
-                                  `component.${item.domain}.config.title`
-                                )}:
-                                ${item.title}
-                              </div>
-                              <div secondary>
-                                ${this._getEntities(item).map(
-                                  (entity) => html`
-                                    <span>
-                                      <ha-state-icon
-                                        .stateObj=${entity}
-                                      ></ha-state-icon>
-                                      <paper-tooltip position="bottom"
-                                        >${computeStateName(
-                                          entity
-                                        )}</paper-tooltip
-                                      >
-                                    </span>
-                                  `
+              ? this._filterConfigEntries(this.configEntries, this._filter).map(
+                  (item: any, idx) =>
+                    item.source === "ignore"
+                      ? ""
+                      : html`
+                          <a
+                            href="/config/integrations/config_entry/${item.entry_id}"
+                          >
+                            <paper-item data-index=${idx}>
+                              <img
+                                src="https://brands.home-assistant.io/${item.domain}/icon.png"
+                                srcset="
+                                  https://brands.home-assistant.io/${item.domain}/icon@2x.png 2x
+                                "
+                                referrerpolicy="no-referrer"
+                                @error=${this._onImageError}
+                                @load=${this._onImageLoad}
+                              />
+                              <paper-item-body two-line>
+                                <div>
+                                  ${this.hass.localize(
+                                    `component.${item.domain}.config.title`
+                                  )}:
+                                  ${item.title}
+                                </div>
+                                <div secondary>
+                                  ${this._getEntities(item).map(
+                                    (entity) => html`
+                                      <span>
+                                        <ha-state-icon
+                                          .stateObj=${entity}
+                                        ></ha-state-icon>
+                                        <paper-tooltip position="bottom"
+                                          >${computeStateName(
+                                            entity
+                                          )}</paper-tooltip
+                                        >
+                                      </span>
+                                    `
+                                  )}
+                                </div>
+                              </paper-item-body>
+                              <ha-icon-next
+                                aria-label=${this.hass.localize(
+                                  "ui.panel.config.integrations.details"
                                 )}
-                              </div>
-                            </paper-item-body>
-                            <ha-icon-next
-                              aria-label=${this.hass.localize(
-                                "ui.panel.config.integrations.details"
-                              )}
-                            ></ha-icon-next>
-                          </paper-item>
-                        </a>
-                      `
+                              ></ha-icon-next>
+                            </paper-item>
+                          </a>
+                        `
                 )
               : html`
                   <div class="config-entry-row">
@@ -359,6 +385,10 @@ export class HaConfigManagerDashboard extends LitElement {
     ev.target.style.visibility = "hidden";
   }
 
+  private _handleSearchChange(ev: CustomEvent) {
+    this._filter = ev.detail.value;
+  }
+
   static get styles(): CSSResult {
     return css`
       mwc-button {
@@ -371,6 +401,9 @@ export class HaConfigManagerDashboard extends LitElement {
       ha-icon {
         cursor: pointer;
         margin: 8px;
+      }
+      search-input {
+        margin: -8px 0;
       }
       .configured {
         padding-bottom: 24px;
