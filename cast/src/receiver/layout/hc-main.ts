@@ -26,6 +26,7 @@ import { ReceiverStatusMessage } from "../../../../src/cast/sender_messages";
 import { loadLovelaceResources } from "../../../../src/panels/lovelace/common/load-resources";
 import { isNavigationClick } from "../../../../src/common/dom/is-navigation-click";
 import { atLeastVersion } from "../../../../src/common/config/version";
+import { applyThemePreload } from "../../../../src/common/dom/apply_theme_preload";
 
 let resourcesLoaded = false;
 
@@ -89,6 +90,7 @@ export class HcMain extends HassElement {
 
   protected firstUpdated(changedProps) {
     super.firstUpdated(changedProps);
+    applyThemePreload();
     import("../second-load");
     window.addEventListener("location-changed", () => {
       if (location.pathname.startsWith("/lovelace/")) {

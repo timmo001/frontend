@@ -6,7 +6,7 @@ import { storeState } from "../util/ha-pref-storage";
 import { subscribeThemes } from "../data/ws-themes";
 import { HassBaseEl } from "./hass-base-mixin";
 import { HASSDomEvent } from "../common/dom/fire_event";
-import { Constructor } from "../types";
+import { Constructor, Theme } from "../types";
 
 declare global {
   // for add event listener
@@ -56,5 +56,22 @@ export default <T extends Constructor<HassBaseEl>>(superClass: T) =>
           (meta.getAttribute("default-content") as string);
         meta.setAttribute("content", themeColor);
       }
+
+      this._setThemePreload(
+        this.hass!.themes[
+          this.hass!.selectedTheme || this.hass!.themes.default_theme
+        ]
+      );
+    }
+
+    private _setThemePreload(theme: Theme) {
+      localStorage.setItem(
+        "theme-primary-background-color",
+        theme["primary-background-color"]
+      );
+      localStorage.setItem(
+        "theme-primary-text-color",
+        theme["primary-text-color"]
+      );
     }
   };

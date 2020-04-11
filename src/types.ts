@@ -70,8 +70,9 @@ export interface CurrentUser {
 
 export interface Theme {
   // Incomplete
+  "primary-background-color": string;
   "primary-color": string;
-  "text-primary-color": string;
+  "primary-text-color": string;
   "accent-color": string;
 }
 
