@@ -50,7 +50,7 @@ export class DevicesDashboardStrategy extends ReactiveElement {
       const path = computeDevicePath(device.id);
 
       return {
-        title: device.name,
+        title: device.name ?? "Unknown Device",
         path: path,
         strategy: {
           type: "device",
