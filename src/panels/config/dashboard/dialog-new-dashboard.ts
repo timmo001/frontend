@@ -1,4 +1,11 @@
-import { mdiHome, mdiMap, mdiPencilOutline, mdiShape, mdiWeb } from "@mdi/js";
+import {
+  mdiHome,
+  mdiDevices,
+  mdiMap,
+  mdiPencilOutline,
+  mdiShape,
+  mdiWeb,
+} from "@mdi/js";
 import type { CSSResultGroup } from "lit";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
@@ -29,6 +36,10 @@ const STRATEGIES = [
   {
     type: "iframe",
     iconPath: mdiWeb,
+  },
+  {
+    type: "devices",
+    iconPath: mdiDevices,
   },
   {
     type: "areas",

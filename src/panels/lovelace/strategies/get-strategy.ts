@@ -33,6 +33,7 @@ const STRATEGIES: Record<LovelaceStrategyConfigType, Record<string, any>> = {
     map: () => import("./map/map-dashboard-strategy"),
     iframe: () => import("./iframe/iframe-dashboard-strategy"),
     areas: () => import("./areas/areas-dashboard-strategy"),
+    devices: () => import("./devices/devices-dashboard-strategy"),
   },
   view: {
     "original-states": () =>
@@ -42,6 +43,7 @@ const STRATEGIES: Record<LovelaceStrategyConfigType, Record<string, any>> = {
     iframe: () => import("./iframe/iframe-view-strategy"),
     area: () => import("./areas/area-view-strategy"),
     "areas-overview": () => import("./areas/areas-overview-view-strategy"),
+    device: () => import("./devices/device-view-strategy"),
   },
   section: {},
 };

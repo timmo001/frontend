@@ -3263,6 +3263,10 @@
                   "title": "Webpage",
                   "description": "Integrate a webpage as a dashboard"
                 },
+                "devices": {
+                  "title": "Devices",
+                  "description": "Display individual devices as a dashboard"
+                },
                 "areas": {
                   "title": "Areas (experimental)",
                   "description": "Display your devices with a view for each area"
@@ -7835,6 +7839,9 @@
             },
             "iframe": {
               "url": "URL"
+            },
+            "devices": {
+              "devices": "Devices to display"
             },
             "areas": {
               "areas_display": "Areas to display",
