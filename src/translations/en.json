@@ -6609,6 +6609,7 @@
               "lights": "Lights",
               "covers": "Covers",
               "climate": "Climate",
+              "weather": "Weather",
               "media_players": "Media players",
               "security": "Security",
               "actions": "Actions",

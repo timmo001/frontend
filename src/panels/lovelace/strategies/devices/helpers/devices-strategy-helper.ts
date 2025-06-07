@@ -20,6 +20,7 @@ import type { TileCardConfig } from "../../../cards/types";
 export const DEVICE_STRATEGY_GROUPS = [
   "lights",
   "climate",
+  "weather",
   "covers",
   "media_players",
   "security",
@@ -30,6 +31,7 @@ export const DEVICE_STRATEGY_GROUPS = [
 export const DEVICE_STRATEGY_GROUP_ICONS = {
   lights: "mdi:lamps",
   climate: "mdi:home-thermometer",
+  weather: "mdi:weather-sunny",
   covers: "mdi:blinds-horizontal",
   media_players: "mdi:multimedia",
   security: "mdi:security",
@@ -54,100 +56,89 @@ export const getDeviceGroupedEntities = (
       generateEntityFilter(hass, {
         domain: "light",
         device: device,
-        entity_category: "none",
       }),
     ],
     covers: [
       generateEntityFilter(hass, {
         domain: "cover",
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: "binary_sensor",
         device: device,
-        device_class: ["door", "garage_door", "window"],
-        entity_category: "none",
+        // device_class: ["door", "garage_door", "window"],
       }),
     ],
     climate: [
       generateEntityFilter(hass, {
         domain: "climate",
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: "humidifier",
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: "water_heater",
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: "fan",
         device: device,
-        entity_category: "none",
+      }),
+    ],
+    weather: [
+      generateEntityFilter(hass, {
+        domain: "weather",
+        device: device,
       }),
     ],
     media_players: [
       generateEntityFilter(hass, {
         domain: "media_player",
         device: device,
-        entity_category: "none",
       }),
     ],
     security: [
       generateEntityFilter(hass, {
         domain: "alarm_control_panel",
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: "lock",
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: "camera",
         device: device,
-        entity_category: "none",
       }),
     ],
     actions: [
       generateEntityFilter(hass, {
         domain: ["script", "scene"],
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: ["automation"],
         device: device,
-        entity_category: "none",
       }),
     ],
     others: [
       generateEntityFilter(hass, {
         domain: "vacuum",
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: "lawn_mower",
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: "valve",
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: ["switch", "button", "input_boolean", "input_button"],
         device: device,
-        entity_category: "none",
       }),
       generateEntityFilter(hass, {
         domain: [
@@ -159,7 +150,6 @@ export const getDeviceGroupedEntities = (
           "timer",
         ],
         device: device,
-        entity_category: "none",
       }),
     ],
   };
