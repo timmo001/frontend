@@ -7,6 +7,8 @@ import { getEntityContext } from "./context/get_entity_context";
 type EntityCategory = "none" | "config" | "diagnostic";
 
 export interface EntityFilter {
+  entity?: string | string[];
+  not_entity?: string | string[];
   domain?: string | string[];
   device_class?: string | string[];
   device?: string | string[];
@@ -23,6 +25,12 @@ export const generateEntityFilter = (
   hass: HomeAssistant,
   filter: EntityFilter
 ): EntityFilterFunc => {
+  const entities = filter.entity
+    ? new Set(ensureArray(filter.entity))
+    : undefined;
+  const notEntities = filter.not_entity
+    ? new Set(ensureArray(filter.not_entity))
+    : undefined;
   const domains = filter.domain
     ? new Set(ensureArray(filter.domain))
     : undefined;
@@ -46,6 +54,16 @@ export const generateEntityFilter = (
     const stateObj = hass.states[entityId] as HassEntity | undefined;
     if (!stateObj) {
       return false;
+    }
+    if (entities) {
+      if (!entities.has(entityId)) {
+        return false;
+      }
+    }
+    if (notEntities) {
+      if (notEntities.has(entityId)) {
+        return false;
+      }
     }
     if (domains) {
       const domain = computeDomain(entityId);

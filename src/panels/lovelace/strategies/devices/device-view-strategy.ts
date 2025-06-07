@@ -54,7 +54,6 @@ export class DeviceViewStrategy extends ReactiveElement {
       lights,
       climate,
       covers,
-      weather,
       media_players,
       security,
       actions,
@@ -96,19 +95,6 @@ export class DeviceViewStrategy extends ReactiveElement {
             DEVICE_STRATEGY_GROUP_ICONS.climate
           ),
           ...climate.map(computeTileCard),
-        ],
-      });
-    }
-
-    if (weather.length > 0) {
-      sections.push({
-        type: "grid",
-        cards: [
-          computeHeadingCard(
-            hass.localize("ui.panel.lovelace.strategy.areas.groups.weather"),
-            DEVICE_STRATEGY_GROUP_ICONS.weather
-          ),
-          ...weather.map(computeTileCard),
         ],
       });
     }

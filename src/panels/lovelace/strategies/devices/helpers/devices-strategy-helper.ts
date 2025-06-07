@@ -20,7 +20,6 @@ import type { TileCardConfig } from "../../../cards/types";
 export const DEVICE_STRATEGY_GROUPS = [
   "lights",
   "climate",
-  "weather",
   "covers",
   "media_players",
   "security",
@@ -31,7 +30,6 @@ export const DEVICE_STRATEGY_GROUPS = [
 export const DEVICE_STRATEGY_GROUP_ICONS = {
   lights: "mdi:lamps",
   climate: "mdi:home-thermometer",
-  weather: "mdi:weather-sunny",
   covers: "mdi:blinds-horizontal",
   media_players: "mdi:multimedia",
   security: "mdi:security",
@@ -87,12 +85,6 @@ export const getDeviceGroupedEntities = (
         device: device,
       }),
     ],
-    weather: [
-      generateEntityFilter(hass, {
-        domain: "weather",
-        device: device,
-      }),
-    ],
     media_players: [
       generateEntityFilter(hass, {
         domain: "media_player",
@@ -142,12 +134,20 @@ export const getDeviceGroupedEntities = (
       }),
       generateEntityFilter(hass, {
         domain: [
-          "select",
-          "number",
-          "input_select",
-          "input_number",
+          "binary_sensor",
           "counter",
+          "date",
+          "datetime",
+          "input_number",
+          "input_select",
+          "number",
+          "select",
+          "sensor",
+          "text",
+          "time",
           "timer",
+          "update",
+          "weather",
         ],
         device: device,
       }),
