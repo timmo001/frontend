@@ -34,6 +34,8 @@ export default class HaAutomationAction extends LitElement {
 
   @property({ attribute: false }) public actions!: Action[];
 
+  @property({ attribute: false }) public parent_action?: Action;
+
   @property({ attribute: false }) public highlightedActions?: Action[];
 
   @state() private _showReorder = false;
@@ -168,6 +170,7 @@ export default class HaAutomationAction extends LitElement {
       type: "action",
       add: this._addAction,
       clipboardItem: getType(this._clipboard?.action),
+      parent_action: this.parent_action,
     });
   }
 
@@ -177,10 +180,11 @@ export default class HaAutomationAction extends LitElement {
       add: this._addAction,
       clipboardItem: getType(this._clipboard?.action),
       group: "building_blocks",
+      parent_action: this.parent_action,
     });
   }
 
-  private _addAction = (action: string) => {
+  private _addAction = (action: string, params?: Record<string, any>) => {
     let actions: Action[];
     if (action === PASTE_VALUE) {
       actions = this.actions.concat(deepClone(this._clipboard!.action));
@@ -188,6 +192,7 @@ export default class HaAutomationAction extends LitElement {
       actions = this.actions.concat({
         action: getService(action),
         metadata: {},
+        ...(params || {}),
       });
     } else {
       const elClass = customElements.get(

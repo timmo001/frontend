@@ -57,6 +57,7 @@ export class HaIfAction extends LitElement implements ActionElement {
         @value-changed=${this._thenChanged}
         .hass=${this.hass}
         .narrow=${this.narrow}
+        .parent_action=${this.action}
       ></ha-automation-action>
       ${this._showElse || action.else
         ? html`
@@ -71,6 +72,7 @@ export class HaIfAction extends LitElement implements ActionElement {
               @value-changed=${this._elseChanged}
               .hass=${this.hass}
               .narrow=${this.narrow}
+              .parent_action=${this.action}
             ></ha-automation-action>
           `
         : html` <div class="link-button-row">

@@ -1,12 +1,14 @@
+import type { Action } from "../../../data/script";
 import { fireEvent } from "../../../common/dom/fire_event";
 
 export const PASTE_VALUE = "__paste__";
 
 export interface AddAutomationElementDialogParams {
   type: "trigger" | "condition" | "action";
-  add: (key: string) => void;
+  add: (key: string, params?: Record<string, any>) => void;
   clipboardItem: string | undefined;
   group?: string;
+  parent_action?: Action;
 }
 const loadDialog = () => import("./add-automation-element-dialog");
 

@@ -7,6 +7,7 @@ import { ifDefined } from "lit/directives/if-defined";
 import { repeat } from "lit/directives/repeat";
 import { styleMap } from "lit/directives/style-map";
 import memoizeOne from "memoize-one";
+import { ensureArray } from "../../../common/array/ensure-array";
 import { fireEvent } from "../../../common/dom/fire_event";
 import { computeDomain } from "../../../common/entity/compute_domain";
 import { stringCompare } from "../../../common/string/compare";
@@ -24,6 +25,8 @@ import "../../../components/ha-md-list";
 import "../../../components/ha-md-list-item";
 import "../../../components/ha-service-icon";
 import "../../../components/search-input";
+import type { Action, ChooseAction, IfAction } from "../../../data/script";
+
 import {
   ACTION_GROUPS,
   ACTION_ICONS,
@@ -31,7 +34,10 @@ import {
   getService,
   isService,
 } from "../../../data/action";
-import type { AutomationElementGroup } from "../../../data/automation";
+import type {
+  AutomationElementGroup,
+  Condition,
+} from "../../../data/automation";
 import { CONDITION_GROUPS, CONDITION_ICONS } from "../../../data/condition";
 import { getServiceIcons } from "../../../data/icons";
 import type { IntegrationManifest } from "../../../data/integration";
@@ -66,6 +72,7 @@ interface ListItem {
   iconPath?: string;
   icon?: TemplateResult;
   group: boolean;
+  params?: Record<string, any>;
 }
 
 type DomainManifestLookup = Record<string, IntegrationManifest>;
@@ -232,6 +239,67 @@ class DialogAddAutomationElement extends LitElement implements HassDialog {
 
   private _fuseIndex = memoizeOne((items: ListItem[]) =>
     Fuse.createIndex(["key", "name", "description"], items)
+  );
+
+  private _getSuggestedItems = memoizeOne(
+    (
+      type: AddAutomationElementDialogParams["type"],
+      parent_action: Action | undefined
+    ): ListItem[] => {
+      if (type !== "action" || !parent_action) {
+        return [];
+      }
+
+      const conditions: (string | Condition)[] =
+        "if" in parent_action
+          ? ((parent_action as IfAction).if as (string | Condition)[])
+          : "choose" in parent_action
+            ? ensureArray((parent_action as ChooseAction).choose).flatMap(
+                (option): (string | Condition)[] =>
+                  option.conditions
+                    ? typeof option.conditions === "string"
+                      ? [option.conditions]
+                      : option.conditions
+                    : []
+              )
+            : [];
+
+      const suggested: ListItem[] = [];
+
+      for (const condition of conditions) {
+        if (
+          typeof condition !== "string" &&
+          condition.condition === "state" &&
+          condition.state === "off" &&
+          condition.entity_id
+        ) {
+          const entity_id = condition.entity_id;
+          const domain = computeDomain(entity_id);
+          if (["light", "switch"].includes(domain)) {
+            suggested.push({
+              group: false,
+              key: `${SERVICE_PREFIX}${domain}.turn_on`,
+              name: `Turn on ${
+                this.hass.states[entity_id]?.attributes.friendly_name ||
+                entity_id
+              }`,
+              description: `Turn on ${entity_id}`,
+              icon: html`
+                <ha-service-icon
+                  .hass=${this.hass}
+                  .service=${`${domain}.turn_on`}
+                ></ha-service-icon>
+              `,
+              params: {
+                entity_id,
+              },
+            });
+          }
+        }
+      }
+
+      return suggested;
+    }
   );
 
   private _getGroupItems = memoizeOne(
@@ -490,6 +558,11 @@ class DialogAddAutomationElement extends LitElement implements HassDialog {
           this._manifests
         );
 
+    const suggestedItems = this._getSuggestedItems(
+      this._params.type,
+      this._params.parent_action
+    );
+
     const groupName = isService(this._group)
       ? domainToName(
           this.hass.localize,
@@ -579,6 +652,36 @@ class DialogAddAutomationElement extends LitElement implements HassDialog {
                 </ha-md-list-item>
                 <ha-md-divider role="separator" tabindex="-1"></ha-md-divider>`
             : ""}
+          ${suggestedItems.length > 0
+            ? html`${repeat(
+                  suggestedItems,
+                  (item) => item.key,
+                  (item) => html`
+                    <ha-md-list-item
+                      interactive
+                      type="button"
+                      .value=${item.key}
+                      .params=${item.params}
+                      @click=${this._selected}
+                    >
+                      <div slot="headline">${item.name}</div>
+                      <div slot="supporting-text">${item.description}</div>
+                      ${item.icon
+                        ? html`<span slot="start">${item.icon}</span>`
+                        : item.iconPath
+                          ? html`<ha-svg-icon
+                              slot="start"
+                              .path=${item.iconPath}
+                            ></ha-svg-icon>`
+                          : nothing}
+                      <ha-svg-icon slot="end" .path=${mdiPlus}></ha-svg-icon>
+                    </ha-md-list-item>
+                  `
+                )}<ha-md-divider
+                  role="separator"
+                  tabindex="-1"
+                ></ha-md-divider>`
+            : ""}
           ${repeat(
             items,
             (item) => item.key,
@@ -636,7 +739,7 @@ class DialogAddAutomationElement extends LitElement implements HassDialog {
       this._group = item.value;
       return;
     }
-    this._params!.add(item.value);
+    this._params!.add(item.value, item.params);
     this.closeDialog();
   }
 

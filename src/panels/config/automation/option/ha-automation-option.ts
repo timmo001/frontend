@@ -27,6 +27,8 @@ export default class HaAutomationOption extends LitElement {
 
   @property({ attribute: false }) public options!: Option[];
 
+  @property({ attribute: false }) public parent_action?: Option;
+
   @state() private _showReorder = false;
 
   @state()
@@ -87,6 +89,7 @@ export default class HaAutomationOption extends LitElement {
                 @move-up=${this._moveUp}
                 @value-changed=${this._optionChanged}
                 .hass=${this.hass}
+                .parent_action=${this.parent_action}
               >
                 ${this._showReorder && !this.disabled
                   ? html`

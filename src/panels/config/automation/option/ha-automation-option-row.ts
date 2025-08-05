@@ -52,6 +52,8 @@ export default class HaAutomationOptionRow extends LitElement {
 
   @property({ type: Boolean }) public last = false;
 
+  @property({ attribute: false }) public parent_action?: Action;
+
   @state() private _expanded = false;
 
   @state()
@@ -196,6 +198,7 @@ export default class HaAutomationOptionRow extends LitElement {
               .disabled=${this.disabled}
               .hass=${this.hass}
               .narrow=${this.narrow}
+              .parent_action=${this.parent_action}
               @value-changed=${this._actionChanged}
             ></ha-automation-action>
           </div>

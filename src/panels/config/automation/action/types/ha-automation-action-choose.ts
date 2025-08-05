@@ -38,6 +38,7 @@ export class HaChooseAction extends LitElement implements ActionElement {
         @value-changed=${this._optionsChanged}
         .hass=${this.hass}
         .narrow=${this.narrow}
+        .parent_action=${this.action}
       ></ha-automation-option>
 
       ${this._showDefault || action.default
@@ -53,6 +54,7 @@ export class HaChooseAction extends LitElement implements ActionElement {
               @value-changed=${this._defaultChanged}
               .hass=${this.hass}
               .narrow=${this.narrow}
+              .parent_action=${this.action}
             ></ha-automation-action>
           `
         : html`
