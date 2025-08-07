@@ -3,6 +3,7 @@ import {
   mdiAlertCircle,
   mdiCancel,
   mdiChevronRight,
+  mdiContentCopy,
   mdiDelete,
   mdiDotsVertical,
   mdiEye,
@@ -114,6 +115,7 @@ import { isHelperDomain } from "../helpers/const";
 import "../integrations/ha-integration-overflow-menu";
 import { showAddIntegrationDialog } from "../integrations/show-add-integration-dialog";
 import { showLabelDetailDialog } from "../labels/show-dialog-label-detail";
+import { showToast } from "../../../util/toast";
 
 export interface StateEntity
   extends Omit<EntityRegistryEntry, "id" | "unique_id"> {
@@ -971,6 +973,18 @@ ${
 
   <ha-md-divider role="separator" tabindex="-1"></ha-md-divider>
 
+  <ha-md-menu-item .clickAction=${this._copyToClipboard}>
+    <ha-svg-icon
+      slot="start"
+      .path=${mdiContentCopy}
+    ></ha-svg-icon>
+    <div slot="headline">${this.hass.localize(
+      "ui.panel.config.entities.picker.copy_to_clipboard.button"
+    )}</div>
+  </ha-md-menu-item>
+
+  <ha-md-divider role="separator" tabindex="-1"></ha-md-divider>
+
   <ha-md-menu-item .clickAction=${this._removeSelected} class="warning">
     <ha-svg-icon
       slot="start"
@@ -1388,6 +1402,34 @@ ${rejected
     regenerateEntityIds(this, this.hass, this._selected);
 
     this._clearSelection();
+  };
+
+  private _copyToClipboard = () => {
+    if (navigator?.clipboard) {
+      try {
+        navigator.clipboard.writeText(this._selected.join("\n"));
+        showToast(this, {
+          message: this.hass.localize(
+            "ui.panel.config.entities.picker.copy_to_clipboard.success",
+            {
+              count: this._selected.length,
+            }
+          ),
+        });
+      } catch (_error) {
+        showToast(this, {
+          message: this.hass.localize(
+            "ui.panel.config.entities.picker.copy_to_clipboard.error"
+          ),
+        });
+      }
+    } else {
+      showToast(this, {
+        message: this.hass.localize(
+          "ui.panel.config.entities.picker.copy_to_clipboard.error"
+        ),
+      });
+    }
   };
 
   private _removeSelected = async () => {
