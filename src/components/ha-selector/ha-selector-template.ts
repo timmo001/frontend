@@ -58,6 +58,7 @@ export class HaTemplateSelector extends LitElement {
         autofocus
         autocomplete-entities
         autocomplete-icons
+        autocomplete-functions
         @value-changed=${this._handleChange}
         dir="ltr"
         linewrap

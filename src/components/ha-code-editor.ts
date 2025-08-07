@@ -17,6 +17,8 @@ import { stopPropagation } from "../common/dom/stop_propagation";
 import type { HomeAssistant } from "../types";
 import "./ha-icon";
 import "./ha-icon-button";
+import { FUNCTIONS, type FunctionDescription } from "../data/code_editor";
+import type { LocalizeKeys } from "../common/translations/localize";
 
 declare global {
   interface HASSDomEvents {
@@ -58,6 +60,9 @@ export class HaCodeEditor extends ReactiveElement {
 
   @property({ type: Boolean, attribute: "autocomplete-icons" })
   public autocompleteIcons = false;
+
+  @property({ type: Boolean, attribute: "autocomplete-functions" })
+  public autocompleteFunctions = false;
 
   @property({ type: Boolean }) public error = false;
 
@@ -238,6 +243,9 @@ export class HaCodeEditor extends ReactiveElement {
       }
       if (this.autocompleteIcons) {
         completionSources.push(this._mdiCompletions.bind(this));
+      }
+      if (this.autocompleteFunctions) {
+        completionSources.push(this._functionCompletions.bind(this));
       }
       if (completionSources.length > 0) {
         extensions.push(
@@ -521,6 +529,50 @@ export class HaCodeEditor extends ReactiveElement {
       from: Number(match.from),
       options: iconItems,
       validFor: /^mdi:\S*$/,
+    };
+  }
+
+  private _getFunctionTranslation(fn: FunctionDescription): Completion {
+    return {
+      ...fn,
+      detail: this.hass!.localize(
+        `ui.components.yaml-editor.functions.${fn.label}` as LocalizeKeys
+      ),
+    };
+  }
+
+  private _functionCompletions(
+    context: CompletionContext
+  ): CompletionResult | null | Promise<CompletionResult | null> {
+    // Match function names that are being typed
+    const functionMatch = context.matchBefore(/[a-z_]+\(?/);
+    if (
+      !functionMatch ||
+      (functionMatch.from === functionMatch.to && !context.explicit)
+    ) {
+      return null;
+    }
+
+    // Get what's already typed
+    const typedText = context.state.sliceDoc(functionMatch.from, context.pos);
+    const cleanTypedText = typedText.replace(/\($/, ""); // Remove trailing parenthesis
+
+    // Filter functions based on what's typed
+    const filteredFunctions = (
+      cleanTypedText
+        ? FUNCTIONS.filter((fn) =>
+            fn.label.toLowerCase().startsWith(cleanTypedText.toLowerCase())
+          )
+        : FUNCTIONS
+    ).map(this._getFunctionTranslation);
+    if (filteredFunctions.length === 0) {
+      return null;
+    }
+
+    return {
+      from: functionMatch.from,
+      options: filteredFunctions,
+      validFor: /^[a-z_]+\(?$/,
     };
   }
 

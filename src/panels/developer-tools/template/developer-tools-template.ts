@@ -144,6 +144,7 @@ class HaPanelDevTemplate extends LitElement {
               autofocus
               autocomplete-entities
               autocomplete-icons
+              autocomplete-functions
               @value-changed=${this._templateChanged}
               dir="ltr"
             ></ha-code-editor>

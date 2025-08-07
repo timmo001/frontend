@@ -33,6 +33,7 @@ export class HaTemplateCondition extends LitElement {
         .value=${value_template}
         .readOnly=${this.disabled}
         autocomplete-entities
+        autocomplete-functions
         @value-changed=${this._valueChanged}
         dir="ltr"
       ></ha-code-editor>

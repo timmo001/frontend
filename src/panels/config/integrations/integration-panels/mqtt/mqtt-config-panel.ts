@@ -131,6 +131,7 @@ export class MQTTConfigPanel extends LitElement {
                 mode="jinja2"
                 autocomplete-entities
                 autocomplete-icons
+                autocomplete-functions
                 .hass=${this.hass}
                 .value=${this._payload}
                 @value-changed=${this._handlePayload}

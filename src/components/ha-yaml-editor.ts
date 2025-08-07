@@ -117,6 +117,7 @@ export class HaYamlEditor extends LitElement {
         mode="yaml"
         autocomplete-entities
         autocomplete-icons
+        autocomplete-functions
         .error=${this.isValid === false}
         @value-changed=${this._onChange}
         @blur=${this._onBlur}
