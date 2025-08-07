@@ -10,8 +10,8 @@ export const FUNCTIONS: FunctionDescription[] = [
   {
     type: "function",
     label: "states",
-    detail: "states(entity_id)",
-    apply: "states('')",
+    detail: "states(entity_id, rounded=False, with_unit=False)",
+    apply: "states('', False, False)",
   },
   {
     type: "function",
@@ -72,7 +72,7 @@ export const FUNCTIONS: FunctionDescription[] = [
   {
     type: "function",
     label: "areas",
-    detail: "areas()",
+    detail: "areas(area_id=None)",
     apply: "areas()",
   },
   {
@@ -90,8 +90,8 @@ export const FUNCTIONS: FunctionDescription[] = [
   {
     type: "function",
     label: "devices",
-    detail: "devices(area_id)",
-    apply: "devices('')",
+    detail: "devices(area_id=None)",
+    apply: "devices()",
   },
   {
     type: "function",
@@ -108,13 +108,13 @@ export const FUNCTIONS: FunctionDescription[] = [
   {
     type: "function",
     label: "config_entries",
-    detail: "config_entries()",
+    detail: "config_entries(domain=None)",
     apply: "config_entries()",
   },
   {
     type: "function",
     label: "floors",
-    detail: "floors()",
+    detail: "floors(floor_id=None)",
     apply: "floors()",
   },
   {
@@ -132,7 +132,7 @@ export const FUNCTIONS: FunctionDescription[] = [
   {
     type: "function",
     label: "labels",
-    detail: "labels()",
+    detail: "labels(label=None)",
     apply: "labels()",
   },
 
@@ -229,13 +229,13 @@ export const FUNCTIONS: FunctionDescription[] = [
     type: "function",
     label: "tan",
     detail: "tan(value)",
-    apply: "tan()",
+    apply: "tan('')",
   },
   {
     type: "function",
     label: "sqrt",
     detail: "sqrt(value)",
-    apply: "sqrt()",
+    apply: "sqrt('')",
   },
   {
     type: "function",
@@ -260,14 +260,14 @@ export const FUNCTIONS: FunctionDescription[] = [
   {
     type: "function",
     label: "float",
-    detail: "float(value, default)",
-    apply: "float('', '')",
+    detail: "float(value, default=None)",
+    apply: "float('', None)",
   },
   {
     type: "function",
     label: "int",
-    detail: "int(value, default, base)",
-    apply: "int('', '', '')",
+    detail: "int(value, default=None, base=10)",
+    apply: "int('', None, 10)",
   },
   {
     type: "function",
@@ -286,8 +286,8 @@ export const FUNCTIONS: FunctionDescription[] = [
   {
     type: "function",
     label: "to_json",
-    detail: "to_json(object, sort_keys)",
-    apply: "to_json('', '')",
+    detail: "to_json(object, sort_keys=False)",
+    apply: "to_json('', False)",
   },
 
   // Type checking functions
