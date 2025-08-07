@@ -17,8 +17,11 @@ import { stopPropagation } from "../common/dom/stop_propagation";
 import type { HomeAssistant } from "../types";
 import "./ha-icon";
 import "./ha-icon-button";
-import { FUNCTIONS, type FunctionDescription } from "../data/code_editor";
-import type { LocalizeKeys } from "../common/translations/localize";
+import { FUNCTIONS } from "../data/code_editor";
+import type {
+  LocalizeFunc,
+  LocalizeKeys,
+} from "../common/translations/localize";
 
 declare global {
   interface HASSDomEvents {
@@ -532,14 +535,14 @@ export class HaCodeEditor extends ReactiveElement {
     };
   }
 
-  private _getFunctionTranslation(fn: FunctionDescription): Completion {
-    return {
+  private _getFunctions = memoizeOne((localize: LocalizeFunc): Completion[] =>
+    FUNCTIONS.map((fn) => ({
       ...fn,
-      detail: this.hass!.localize(
+      detail: localize(
         `ui.components.yaml-editor.functions.${fn.label}` as LocalizeKeys
       ),
-    };
-  }
+    }))
+  );
 
   private _functionCompletions(
     context: CompletionContext
@@ -557,14 +560,13 @@ export class HaCodeEditor extends ReactiveElement {
     const typedText = context.state.sliceDoc(functionMatch.from, context.pos);
     const cleanTypedText = typedText.replace(/\($/, ""); // Remove trailing parenthesis
 
-    // Filter functions based on what's typed
-    const filteredFunctions = (
-      cleanTypedText
-        ? FUNCTIONS.filter((fn) =>
-            fn.label.toLowerCase().startsWith(cleanTypedText.toLowerCase())
-          )
-        : FUNCTIONS
-    ).map(this._getFunctionTranslation);
+    const functions = this._getFunctions(this.hass!.localize);
+    const filteredFunctions = cleanTypedText
+      ? functions.filter((fn) =>
+          fn.label.toLowerCase().startsWith(cleanTypedText.toLowerCase())
+        )
+      : functions;
+
     if (filteredFunctions.length === 0) {
       return null;
     }

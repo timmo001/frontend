@@ -11,7 +11,7 @@ export const FUNCTIONS: FunctionDescription[] = [
     type: "function",
     label: "states",
     detail: "states(entity_id, rounded=False, with_unit=False)",
-    apply: "states('', False, False)",
+    apply: "states('', rounded=False, with_unit=False)",
   },
   {
     type: "function",
@@ -261,13 +261,13 @@ export const FUNCTIONS: FunctionDescription[] = [
     type: "function",
     label: "float",
     detail: "float(value, default=None)",
-    apply: "float('', None)",
+    apply: "float('', default=None)",
   },
   {
     type: "function",
     label: "int",
     detail: "int(value, default=None, base=10)",
-    apply: "int('', None, 10)",
+    apply: "int('', default=None, base=10)",
   },
   {
     type: "function",
@@ -287,7 +287,7 @@ export const FUNCTIONS: FunctionDescription[] = [
     type: "function",
     label: "to_json",
     detail: "to_json(object, sort_keys=False)",
-    apply: "to_json('', False)",
+    apply: "to_json('', sort_keys=False)",
   },
 
   // Type checking functions
