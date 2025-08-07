@@ -239,6 +239,10 @@ export class HaCodeEditor extends ReactiveElement {
       if (this.autocompleteIcons) {
         completionSources.push(this._mdiCompletions.bind(this));
       }
+      // Add state_attr completions for template modes
+      if (this.hass) {
+        completionSources.push(this._stateAttrCompletions.bind(this));
+      }
       if (completionSources.length > 0) {
         extensions.push(
           this._loadedCodeMirror.autocompletion({
@@ -521,6 +525,70 @@ export class HaCodeEditor extends ReactiveElement {
       from: Number(match.from),
       options: iconItems,
       validFor: /^mdi:\S*$/,
+    };
+  }
+
+  private _getEntityAttributes = memoizeOne(
+    (entityId: string, states: HassEntities): Completion[] => {
+      const stateObj = states[entityId];
+      if (!stateObj) {
+        return [];
+      }
+
+      return Object.keys(stateObj.attributes).map((attr) => ({
+        type: "property",
+        label: attr,
+        detail: "Entity attribute",
+        info: `Value: ${JSON.stringify(stateObj.attributes[attr])}`,
+      }));
+    }
+  );
+
+  private _stateAttrCompletions(
+    context: CompletionContext
+  ): CompletionResult | null | Promise<CompletionResult | null> {
+    if (!this.hass) {
+      return null;
+    }
+
+    // Get the text before cursor to analyze context
+    const textBefore = context.state.sliceDoc(0, context.pos);
+
+    // Match state_attr function with first parameter and opening quote for second parameter
+    // Handles: state_attr("entity.id", "
+    // Also handles: state_attr('entity.id', '
+    const stateAttrMatch = textBefore.match(
+      /state_attr\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)$/
+    );
+
+    if (!stateAttrMatch) {
+      return null;
+    }
+
+    const entityId = stateAttrMatch[1];
+    const partialAttribute = stateAttrMatch[2];
+
+    // Get attributes for the entity
+    const attributes = this._getEntityAttributes(entityId, this.hass.states);
+
+    if (!attributes || !attributes.length) {
+      return null;
+    }
+
+    // Filter attributes based on what's already typed
+    const filteredAttributes = partialAttribute
+      ? attributes.filter((attr) =>
+          attr.label.toLowerCase().startsWith(partialAttribute.toLowerCase())
+        )
+      : attributes;
+
+    // Calculate the start position for replacement (after the opening quote)
+    const startPos = context.pos - partialAttribute.length;
+
+    return {
+      from: startPos,
+      options: filteredAttributes,
+      validFor: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
     };
   }
 
