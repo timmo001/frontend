@@ -31,6 +31,7 @@ import "./ha-pick-time-zone-row";
 import "./ha-push-notifications-row";
 import "./ha-set-suspend-row";
 import "./ha-set-vibrate-row";
+import "./ha-streamer-mode-row";
 
 @customElement("ha-profile-section-general")
 class HaProfileSectionGeneral extends LitElement {
@@ -175,6 +176,11 @@ class HaProfileSectionGeneral extends LitElement {
                 )}
               </ha-button>
             </ha-settings-row>
+            <ha-streamer-mode-row
+              .narrow=${this.narrow}
+              .hass=${this.hass}
+              .coreUserData=${this._coreUserData}
+            ></ha-streamer-mode-row>
             ${this.hass.user!.is_admin
               ? html`
                   <ha-advanced-mode-row

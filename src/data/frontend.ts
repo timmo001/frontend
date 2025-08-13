@@ -3,6 +3,7 @@ import type { Connection } from "home-assistant-js-websocket";
 export interface CoreFrontendUserData {
   showAdvanced?: boolean;
   showEntityIdPicker?: boolean;
+  streamerMode?: boolean;
 }
 
 export interface SidebarFrontendUserData {

@@ -8307,6 +8307,10 @@
           "title": "Display entity IDs in picker",
           "description": "Shows the full entity IDs when selecting entities with a picker."
         },
+        "streamer_mode": {
+          "header": "Streamer mode",
+          "description": "Enable or disable streamer mode. When enabled, certain areas of the UI will be hidden."
+        },
         "refresh_tokens": {
           "header": "Refresh tokens",
           "description": "Each refresh token represents a login session. Refresh tokens will be automatically deleted when you log out. Unused refresh tokens will be automatically deleted after 90 days. The following refresh tokens are currently active for your account.",
