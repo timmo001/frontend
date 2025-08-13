@@ -453,7 +453,7 @@ class HaHLSPlayer extends LitElement {
           sum += v * v;
         }
         const rms = Math.sqrt(sum / bufferLength); // 0..1
-        const widthPct = Math.min(100, Math.max(0, rms * 200));
+        const widthPct = Math.min(100, Math.max(0, rms * 2000));
         bar.style.setProperty("--meter-width", widthPct + "%");
         this._raf = requestAnimationFrame(animate);
       };

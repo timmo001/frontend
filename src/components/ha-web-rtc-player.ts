@@ -456,7 +456,7 @@ class HaWebRtcPlayer extends LitElement {
           sum += v * v;
         }
         const rms = Math.sqrt(sum / bufferLength);
-        const widthPct = Math.min(100, Math.max(0, rms * 200));
+        const widthPct = Math.min(100, Math.max(0, rms * 2000));
         bar.style.setProperty("--meter-width", widthPct + "%");
         this._raf = requestAnimationFrame(animate);
       };
@@ -520,8 +520,9 @@ class HaWebRtcPlayer extends LitElement {
       position: absolute;
       left: 0;
       right: 0;
-      bottom: 0;
+      bottom: 40px;
       height: 8px;
+      width: 100%;
       pointer-events: none;
       display: flex;
       align-items: center;
@@ -532,7 +533,7 @@ class HaWebRtcPlayer extends LitElement {
       position: relative;
       width: 100%;
       max-width: 70%;
-      height: 2px;
+      height: 4px;
       background: transparent;
     }
 
