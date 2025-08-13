@@ -11,6 +11,7 @@ import {
   object,
   optional,
   string,
+  boolean,
 } from "superstruct";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import type { LocalizeFunc } from "../../../../common/translations/localize";
@@ -47,6 +48,7 @@ const cardConfigStruct = assign(
     entities: array(entitiesConfigStruct),
     theme: optional(string()),
     fit_mode: optional(enums(["cover", "contain", "fill"])),
+    audio_meter: optional(boolean()),
   })
 );
 
@@ -149,6 +151,7 @@ export class HuiPictureGlanceCardEditor
             },
           ],
         },
+        { name: "audio_meter", selector: { boolean: {} } },
       ] as const satisfies HaFormSchema[]
   );
 

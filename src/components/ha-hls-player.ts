@@ -3,6 +3,7 @@ import type { PropertyValues, TemplateResult } from "lit";
 import { css, html, LitElement } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
 import { styleMap } from "lit/directives/style-map";
+import { ifDefined } from "lit/directives/if-defined";
 import { isComponentLoaded } from "../common/config/is_component_loaded";
 import { fireEvent } from "../common/dom/fire_event";
 import { nextRender } from "../common/util/render-status";
@@ -43,6 +44,9 @@ class HaHLSPlayer extends LitElement {
 
   @property({ type: Boolean, attribute: "allow-exoplayer" })
   public allowExoPlayer = false;
+
+  @property({ type: Boolean, attribute: "audio-meter" })
+  public audioMeter = false;
 
   // don't cache this, as we remove it on disconnects
   @query("video") private _videoEl!: HTMLVideoElement;
@@ -99,19 +103,26 @@ class HaHLSPlayer extends LitElement {
           </ha-alert>`
         : ""}
       ${!this._errorIsFatal
-        ? html`<video
-            .poster=${this.posterUrl}
-            ?autoplay=${this.autoPlay}
-            .muted=${this.muted}
-            ?playsinline=${this.playsInline}
-            ?controls=${this.controls}
-            @loadeddata=${this._loadedData}
-            style=${styleMap({
-              height: this.aspectRatio == null ? "100%" : "auto",
-              aspectRatio: this.aspectRatio,
-              objectFit: this.fitMode,
-            })}
-          ></video>`
+        ? html`<div class="container">
+            <video
+              poster=${ifDefined(this.posterUrl)}
+              ?autoplay=${this.autoPlay}
+              .muted=${this.muted}
+              ?playsinline=${this.playsInline}
+              ?controls=${this.controls}
+              @loadeddata=${this._loadedData}
+              style=${styleMap({
+                height: this.aspectRatio == null ? "100%" : "auto",
+                aspectRatio: this.aspectRatio,
+                objectFit: this.fitMode,
+              })}
+            ></video>
+            ${this.audioMeter
+              ? html`<div class="audio-meter" aria-hidden="true">
+                  <div class="bar"></div>
+                </div>`
+              : ""}
+          </div>`
         : ""}
     `;
   }
@@ -365,6 +376,7 @@ class HaHLSPlayer extends LitElement {
       this._videoEl.removeAttribute("src");
       this._videoEl.load();
     }
+    this._teardownAudioContext();
   }
 
   private _resetError() {
@@ -396,6 +408,70 @@ class HaHLSPlayer extends LitElement {
 
   private _loadedData() {
     fireEvent(this, "load");
+    this._setupAudioContextIfNeeded();
+  }
+
+  private _audioContext?: AudioContext;
+
+  private _analyser?: AnalyserNode;
+
+  private _sourceNode?: MediaElementAudioSourceNode;
+
+  private _raf?: number;
+
+  private _setupAudioContextIfNeeded() {
+    if (!this.audioMeter) {
+      return;
+    }
+    try {
+      if (!this._audioContext) {
+        this._audioContext = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
+      }
+      if (!this._analyser) {
+        this._analyser = this._audioContext.createAnalyser();
+        this._analyser.fftSize = 256;
+      }
+      if (!this._sourceNode) {
+        this._sourceNode = this._audioContext.createMediaElementSource(
+          this._videoEl
+        );
+        this._sourceNode.connect(this._analyser);
+      }
+      const bar = this.renderRoot.querySelector(
+        ".audio-meter .bar"
+      ) as HTMLElement | null;
+      if (!bar) return;
+      const bufferLength = this._analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      const animate = () => {
+        this._analyser!.getByteTimeDomainData(dataArray);
+        // Compute normalized amplitude around center
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const v = (dataArray[i] - 128) / 128; // -1 to 1
+          sum += v * v;
+        }
+        const rms = Math.sqrt(sum / bufferLength); // 0..1
+        const widthPct = Math.min(100, Math.max(0, rms * 200));
+        bar.style.setProperty("--meter-width", widthPct + "%");
+        this._raf = requestAnimationFrame(animate);
+      };
+      this._raf = requestAnimationFrame(animate);
+    } catch (_e) {
+      // ignore
+    }
+  }
+
+  private _teardownAudioContext() {
+    if (this._raf) cancelAnimationFrame(this._raf);
+    this._raf = undefined;
+    this._sourceNode?.disconnect();
+    this._analyser?.disconnect();
+    this._sourceNode = undefined;
+    this._analyser = undefined;
+    // Keep audio context for reuse to avoid user-gesture restrictions
+    // Intentionally not closing the context
   }
 
   static styles = css`
@@ -404,9 +480,53 @@ class HaHLSPlayer extends LitElement {
       display: block;
     }
 
+    .container {
+      position: relative;
+    }
+
     video {
       width: 100%;
       max-height: var(--video-max-height, calc(100vh - 97px));
+    }
+
+    .audio-meter {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 8px;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .audio-meter .bar {
+      position: relative;
+      width: 100%;
+      max-width: 70%;
+      height: 2px;
+      background: transparent;
+    }
+
+    .audio-meter .bar::before,
+    .audio-meter .bar::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: var(--meter-width, 0%);
+      background: var(--primary-color);
+      transition: width 0.08s linear;
+    }
+
+    .audio-meter .bar::before {
+      left: 50%;
+      transform: translateX(-100%);
+    }
+    .audio-meter .bar::after {
+      right: 50%;
+      transform: translateX(100%);
     }
 
     .fatal {

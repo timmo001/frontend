@@ -486,6 +486,7 @@ export interface PictureGlanceCardConfig extends LovelaceCardConfig {
   double_tap_action?: ActionConfig;
   show_state?: boolean;
   theme?: string;
+  audio_meter?: boolean;
 }
 
 export interface PlantAttributeTarget extends EventTarget {

@@ -43,6 +43,9 @@ export class HaCameraStream extends LitElement {
   @property({ type: Boolean, attribute: "muted" })
   public muted = false;
 
+  @property({ type: Boolean, attribute: "audio-meter" })
+  public audioMeter = false;
+
   @property({ type: Boolean, attribute: "allow-exoplayer" })
   public allowExoPlayer = false;
 
@@ -121,13 +124,14 @@ export class HaCameraStream extends LitElement {
         .allowExoPlayer=${this.allowExoPlayer}
         .muted=${this.muted}
         .controls=${this.controls}
-        .hass=${this.hass}
+        .hass=${this.hass!}
         .entityid=${this.stateObj.entity_id}
         .posterUrl=${this._posterUrl}
         @streams=${this._handleHlsStreams}
         class=${stream.visible ? "" : "hidden"}
         .aspectRatio=${this.aspectRatio}
         .fitMode=${this.fitMode}
+        .audioMeter=${this.audioMeter}
       ></ha-hls-player>`;
     }
 
@@ -137,13 +141,14 @@ export class HaCameraStream extends LitElement {
         playsinline
         .muted=${this.muted}
         .controls=${this.controls}
-        .hass=${this.hass}
+        .hass=${this.hass!}
         .entityid=${this.stateObj.entity_id}
         .posterUrl=${this._posterUrl}
         @streams=${this._handleWebRtcStreams}
         class=${stream.visible ? "" : "hidden"}
         .aspectRatio=${this.aspectRatio}
         .fitMode=${this.fitMode}
+        .audioMeter=${this.audioMeter}
       ></ha-web-rtc-player>`;
     }
 

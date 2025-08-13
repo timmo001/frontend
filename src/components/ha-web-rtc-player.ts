@@ -45,6 +45,9 @@ class HaWebRtcPlayer extends LitElement {
 
   @property({ attribute: "poster-url" }) public posterUrl?: string;
 
+  @property({ type: Boolean, attribute: "audio-meter" })
+  public audioMeter = true;
+
   @state() private _error?: string;
 
   @query("#remote-stream") private _videoEl!: HTMLVideoElement;
@@ -74,20 +77,27 @@ class HaWebRtcPlayer extends LitElement {
       return html`<ha-alert alert-type="error">${this._error}</ha-alert>`;
     }
     return html`
-      <video
-        id="remote-stream"
-        ?autoplay=${this.autoPlay}
-        .muted=${this.muted}
-        ?playsinline=${this.playsInline}
-        ?controls=${this.controls}
-        poster=${ifDefined(this.posterUrl)}
-        @loadeddata=${this._loadedData}
-        style=${styleMap({
-          height: this.aspectRatio == null ? "100%" : "auto",
-          aspectRatio: this.aspectRatio,
-          objectFit: this.fitMode,
-        })}
-      ></video>
+      <div class="container">
+        <video
+          id="remote-stream"
+          ?autoplay=${this.autoPlay}
+          .muted=${this.muted}
+          ?playsinline=${this.playsInline}
+          ?controls=${this.controls}
+          poster=${ifDefined(this.posterUrl)}
+          @loadeddata=${this._loadedData}
+          style=${styleMap({
+            height: this.aspectRatio == null ? "100%" : "auto",
+            aspectRatio: this.aspectRatio,
+            objectFit: this.fitMode,
+          })}
+        ></video>
+        ${this.audioMeter
+          ? html`<div class="audio-meter" aria-hidden="true">
+              <div class="bar"></div>
+            </div>`
+          : ""}
+      </div>
     `;
   }
 
@@ -385,6 +395,7 @@ class HaWebRtcPlayer extends LitElement {
     this._unsub = undefined;
     this._sessionId = undefined;
     this._candidatesList = [];
+    this._teardownAudioContext();
   }
 
   private _loadedData() {
@@ -401,6 +412,69 @@ class HaWebRtcPlayer extends LitElement {
 
     this._logEvent("loadedData", data);
     this._stopTimer();
+    this._setupAudioContextIfNeeded();
+  }
+
+  private _audioContext?: AudioContext;
+
+  private _analyser?: AnalyserNode;
+
+  private _sourceNode?: MediaStreamAudioSourceNode;
+
+  private _raf?: number;
+
+  private _setupAudioContextIfNeeded() {
+    if (!this.audioMeter) {
+      return;
+    }
+    try {
+      if (!this._audioContext) {
+        this._audioContext = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
+      }
+      if (!this._analyser) {
+        this._analyser = this._audioContext.createAnalyser();
+        this._analyser.fftSize = 256;
+      }
+      if (!this._sourceNode) {
+        const stream = this._videoEl.srcObject as MediaStream | null;
+        if (!stream) return;
+        this._sourceNode = this._audioContext.createMediaStreamSource(stream);
+        this._sourceNode.connect(this._analyser);
+      }
+      const bar = this.renderRoot.querySelector(
+        ".audio-meter .bar"
+      ) as HTMLElement | null;
+      if (!bar) return;
+      const bufferLength = this._analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      const animate = () => {
+        this._analyser!.getByteTimeDomainData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const v = (dataArray[i] - 128) / 128;
+          sum += v * v;
+        }
+        const rms = Math.sqrt(sum / bufferLength);
+        const widthPct = Math.min(100, Math.max(0, rms * 200));
+        bar.style.setProperty("--meter-width", widthPct + "%");
+        this._raf = requestAnimationFrame(animate);
+      };
+      this._raf = requestAnimationFrame(animate);
+    } catch (_e) {
+      // ignore
+    }
+  }
+
+  private _teardownAudioContext() {
+    if (this._raf) cancelAnimationFrame(this._raf);
+    this._raf = undefined;
+    this._sourceNode?.disconnect();
+    this._analyser?.disconnect();
+    this._sourceNode = undefined;
+    this._analyser = undefined;
+    // Keep audio context for reuse to avoid user-gesture restrictions
+    // Intentionally not closing the context
   }
 
   private _startTimer() {
@@ -433,9 +507,53 @@ class HaWebRtcPlayer extends LitElement {
       display: block;
     }
 
+    .container {
+      position: relative;
+    }
+
     video {
       width: 100%;
       max-height: var(--video-max-height, calc(100vh - 97px));
+    }
+
+    .audio-meter {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 8px;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .audio-meter .bar {
+      position: relative;
+      width: 100%;
+      max-width: 70%;
+      height: 2px;
+      background: transparent;
+    }
+
+    .audio-meter .bar::before,
+    .audio-meter .bar::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: var(--meter-width, 0%);
+      background: var(--primary-color);
+      transition: width 0.08s linear;
+    }
+
+    .audio-meter .bar::before {
+      left: 50%;
+      transform: translateX(-100%);
+    }
+    .audio-meter .bar::after {
+      right: 50%;
+      transform: translateX(100%);
     }
   `;
 }

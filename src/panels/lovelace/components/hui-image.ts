@@ -59,6 +59,9 @@ export class HuiImage extends LitElement {
     | "contain"
     | "fill";
 
+  @property({ type: Boolean, attribute: "audio-meter" }) public audioMeter =
+    false;
+
   @state() private _imageVisible? = false;
 
   @state() private _loadState?: LoadState;
@@ -224,6 +227,7 @@ export class HuiImage extends LitElement {
                 .aspectRatio=${this._ratio
                   ? this._ratio.w / this._ratio.h
                   : undefined}
+                .audioMeter=${this.audioMeter}
                 @load=${this._onVideoLoad}
               ></ha-camera-stream>
             `

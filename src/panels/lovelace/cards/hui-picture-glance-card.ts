@@ -240,6 +240,7 @@ class HuiPictureGlanceCard extends LitElement implements LovelaceCard {
           .cameraView=${this._config.camera_view}
           .entity=${this._config.entity}
           .fitMode=${this._config.fit_mode}
+          .audioMeter=${this._config.audio_meter ?? false}
           .aspectRatio=${ignoreAspectRatio
             ? undefined
             : this._config.aspect_ratio}
