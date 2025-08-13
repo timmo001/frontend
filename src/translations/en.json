@@ -6815,6 +6815,9 @@
             "perform_action": "Perform action {name}",
             "more_info": "Show more info: {name}"
           },
+          "picture_glance": {
+            "streamer_mode_hidden": "Hidden in streamer mode"
+          },
           "iframe": {
             "error_secure_context": "Unable to load iframes pointing at websites using {target_protocol} if Home Assistant is served over {context_protocol}."
           },

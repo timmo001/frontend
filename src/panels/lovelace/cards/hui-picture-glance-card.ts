@@ -2,6 +2,7 @@ import type { PropertyValues, TemplateResult } from "lit";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { classMap } from "lit/directives/class-map";
+import { styleMap } from "lit/directives/style-map";
 import { ifDefined } from "lit/directives/if-defined";
 import { DOMAINS_TOGGLE } from "../../../common/const";
 import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
@@ -29,6 +30,7 @@ import type {
   PictureGlanceEntityConfig,
 } from "./types";
 import type { PersonEntity } from "../../../data/person";
+import parseAspectRatio from "../../../common/util/parse-aspect-ratio";
 
 const STATES_OFF = new Set([
   "closed",
@@ -134,7 +136,8 @@ class HuiPictureGlanceCard extends LitElement implements LovelaceCard {
     if (
       !oldHass ||
       oldHass.themes !== this.hass.themes ||
-      oldHass.locale !== this.hass.locale
+      oldHass.locale !== this.hass.locale ||
+      oldHass.userData !== this.hass.userData
     ) {
       return true;
     }
@@ -191,8 +194,10 @@ class HuiPictureGlanceCard extends LitElement implements LovelaceCard {
       return nothing;
     }
 
+    const streamerModeActive = this.hass.userData?.streamerMode === true;
+
     let image: string | undefined = this._config.image;
-    if (this._config.image_entity) {
+    if (!streamerModeActive && this._config.image_entity) {
       const stateObj: ImageEntity | PersonEntity | undefined =
         this.hass.states[this._config.image_entity];
       const domain: string = computeDomain(this._config.image_entity);
@@ -211,39 +216,85 @@ class HuiPictureGlanceCard extends LitElement implements LovelaceCard {
     const ignoreAspectRatio =
       this.layout === "grid" &&
       typeof this._config.grid_options?.rows === "number";
+    const ratio =
+      !ignoreAspectRatio && this._config.aspect_ratio
+        ? parseAspectRatio(this._config.aspect_ratio)
+        : null;
+    const paddingPercent =
+      ratio && ratio.w > 0 && ratio.h > 0 ? (100 * ratio.h) / ratio.w : 56.25; // default to 16:9
 
     return html`
       <ha-card>
-        <hui-image
-          class=${classMap({
-            clickable: Boolean(
-              this._config.tap_action ||
-                this._config.hold_action ||
-                this._config.camera_image ||
-                this._config.image_entity
-            ),
-          })}
-          @action=${this._handleAction}
-          .actionHandler=${actionHandler({
-            hasHold: hasAction(this._config!.hold_action),
-            hasDoubleClick: hasAction(this._config!.double_tap_action),
-          })}
-          tabindex=${ifDefined(
-            hasAction(this._config.tap_action) ? "0" : undefined
-          )}
-          .config=${this._config}
-          .hass=${this.hass}
-          .image=${image}
-          .stateImage=${this._config.state_image}
-          .stateFilter=${this._config.state_filter}
-          .cameraImage=${this._config.camera_image}
-          .cameraView=${this._config.camera_view}
-          .entity=${this._config.entity}
-          .fitMode=${this._config.fit_mode}
-          .aspectRatio=${ignoreAspectRatio
-            ? undefined
-            : this._config.aspect_ratio}
-        ></hui-image>
+        ${streamerModeActive
+          ? html`
+              <div
+                class="placeholder ${classMap({
+                  clickable: Boolean(
+                    this._config.tap_action ||
+                      this._config.hold_action ||
+                      this._config.double_tap_action
+                  ),
+                })}"
+                @action=${this._handleAction}
+                .actionHandler=${actionHandler({
+                  hasHold: hasAction(this._config!.hold_action),
+                  hasDoubleClick: hasAction(this._config!.double_tap_action),
+                })}
+                tabindex=${ifDefined(
+                  hasAction(this._config.tap_action) ? "0" : undefined
+                )}
+                .config=${this._config}
+              >
+                <div
+                  class=${classMap({
+                    ratio: true,
+                    fill: this._config.fit_mode === "fill",
+                    contain: this._config.fit_mode === "contain",
+                  })}
+                  style=${styleMap({
+                    paddingBottom: `${paddingPercent.toFixed(2)}%`,
+                  })}
+                >
+                  <div class="center">
+                    ${this.hass.localize(
+                      "ui.panel.lovelace.cards.picture_glance.streamer_mode_hidden"
+                    )}
+                  </div>
+                </div>
+              </div>
+            `
+          : html`
+              <hui-image
+                class=${classMap({
+                  clickable: Boolean(
+                    this._config.tap_action ||
+                      this._config.hold_action ||
+                      this._config.camera_image ||
+                      this._config.image_entity
+                  ),
+                })}
+                @action=${this._handleAction}
+                .actionHandler=${actionHandler({
+                  hasHold: hasAction(this._config!.hold_action),
+                  hasDoubleClick: hasAction(this._config!.double_tap_action),
+                })}
+                tabindex=${ifDefined(
+                  hasAction(this._config.tap_action) ? "0" : undefined
+                )}
+                .config=${this._config}
+                .hass=${this.hass}
+                .image=${image}
+                .stateImage=${this._config.state_image}
+                .stateFilter=${this._config.state_filter}
+                .cameraImage=${this._config.camera_image}
+                .cameraView=${this._config.camera_view}
+                .entity=${this._config.entity}
+                .fitMode=${this._config.fit_mode}
+                .aspectRatio=${ignoreAspectRatio
+                  ? undefined
+                  : this._config.aspect_ratio}
+              ></hui-image>
+            `}
         <div class="box">
           ${this._config.title
             ? html`<div class="title">${this._config.title}</div>`
@@ -345,6 +396,31 @@ class HuiPictureGlanceCard extends LitElement implements LovelaceCard {
     }
     hui-image.clickable {
       cursor: pointer;
+    }
+    .placeholder.clickable {
+      cursor: pointer;
+    }
+    .ratio {
+      position: relative;
+      width: 100%;
+      height: 0;
+      background-color: var(--divider-color);
+    }
+    .ratio.fill {
+      background-size: 100% 100%;
+    }
+    .ratio.contain {
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    .ratio .center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--secondary-text-color);
+      text-align: center;
+      padding: 8px 12px;
     }
     .box {
       position: absolute;
