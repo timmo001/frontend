@@ -101,6 +101,10 @@ export class HaYamlEditor extends LitElement {
     }
   }
 
+  public get isFocused(): boolean {
+    return !!this._codeEditor?.codemirror?.hasFocus;
+  }
+
   protected render() {
     if (this._yaml === undefined) {
       return nothing;

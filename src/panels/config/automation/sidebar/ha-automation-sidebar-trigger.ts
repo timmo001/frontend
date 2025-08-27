@@ -44,7 +44,7 @@ export default class HaAutomationSidebarTrigger extends LitElement {
       this._warnings = undefined;
       if (this.config) {
         this.yamlMode = this.config.yamlMode;
-        if (this.yamlMode) {
+        if (this.yamlMode && !this.editor?.yamlEditor?.isFocused) {
           this.editor?.yamlEditor?.setValue(this.config.config);
         }
       }
