@@ -7,9 +7,6 @@ import type { WeatherViewStrategyConfig } from "./weather-view-strategy";
 export interface WeatherDashboardStrategyConfig {
   type: "weather";
   weather_entity: string;
-  units?: "metric" | "imperial";
-  show_forecast?: boolean;
-  show_current?: boolean;
 }
 
 @customElement("weather-dashboard-strategy")
@@ -26,9 +23,6 @@ export class WeatherDashboardStrategy extends ReactiveElement {
           strategy: {
             type: "weather",
             weather_entity: config.weather_entity,
-            units: config.units,
-            show_forecast: config.show_forecast,
-            show_current: config.show_current,
           } satisfies WeatherViewStrategyConfig,
         },
       ],

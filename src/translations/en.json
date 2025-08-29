@@ -3368,6 +3368,10 @@
                 "home": {
                   "title": "Home (experimental)",
                   "description": "Global overview of your home"
+                },
+                "weather": {
+                  "title": "Weather",
+                  "description": "Display weather information and forecasts"
                 }
               },
               "search_dashboards": "Search dashboards",
@@ -8176,6 +8180,9 @@
               "no_entities": "No entities in this group, the section will not be displayed",
               "use_compact_card": "Use compact card",
               "use_large_card": "Use large card"
+            },
+            "weather": {
+              "weather_entity": "Weather entity"
             }
           },
           "view": {

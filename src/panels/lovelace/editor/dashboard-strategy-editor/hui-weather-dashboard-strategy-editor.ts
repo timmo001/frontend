@@ -21,29 +21,6 @@ const SCHEMA = [
     },
     required: true,
   },
-  {
-    name: "units",
-    selector: {
-      select: {
-        options: [
-          { value: "metric", label: "Metric" },
-          { value: "imperial", label: "Imperial" },
-        ],
-      },
-    },
-  },
-  {
-    name: "show_forecast",
-    selector: {
-      boolean: {},
-    },
-  },
-  {
-    name: "show_current",
-    selector: {
-      boolean: {},
-    },
-  },
 ] as const satisfies readonly HaFormSchema[];
 
 @customElement("hui-weather-dashboard-strategy-editor")
@@ -86,18 +63,6 @@ export class HuiWeatherDashboardStrategyEditor
       case "weather_entity":
         return this.hass?.localize(
           "ui.panel.lovelace.editor.strategy.weather.weather_entity"
-        );
-      case "units":
-        return this.hass?.localize(
-          "ui.panel.lovelace.editor.strategy.weather.units"
-        );
-      case "show_forecast":
-        return this.hass?.localize(
-          "ui.panel.lovelace.editor.strategy.weather.show_forecast"
-        );
-      case "show_current":
-        return this.hass?.localize(
-          "ui.panel.lovelace.editor.strategy.weather.show_current"
         );
       default:
         return "";

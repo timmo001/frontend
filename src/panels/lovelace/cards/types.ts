@@ -560,6 +560,11 @@ export interface WeatherForecastCardConfig extends LovelaceCardConfig {
   double_tap_action?: ActionConfig;
 }
 
+export interface WeatherViewCardConfig extends WeatherForecastCardConfig {
+  type: "weather-view";
+  entity: string;
+}
+
 export interface TileCardConfig extends LovelaceCardConfig {
   entity: string;
   name?: string;
