@@ -5,7 +5,7 @@ import type { LovelaceStrategyEditor } from "../types";
 
 export interface WeatherViewStrategyConfig {
   type: "weather";
-  location?: string;
+  weather_entity: string;
   units?: "metric" | "imperial";
   show_forecast?: boolean;
   show_current?: boolean;
@@ -16,13 +16,13 @@ export class WeatherViewStrategy extends ReactiveElement {
   static async generate(
     config: WeatherViewStrategyConfig
   ): Promise<LovelaceViewConfig> {
-    const cards = [];
+    const cards: any[] = [];
 
     // Add current weather card if enabled
     if (config.show_current !== false) {
       cards.push({
         type: "weather-forecast",
-        entity: "weather.home", // Default entity, could be configurable
+        entity: config.weather_entity,
         show_conditions: true,
         show_temperature: true,
         show_humidity: true,
@@ -36,7 +36,7 @@ export class WeatherViewStrategy extends ReactiveElement {
     if (config.show_forecast !== false) {
       cards.push({
         type: "weather-forecast",
-        entity: "weather.home", // Default entity, could be configurable
+        entity: config.weather_entity,
         show_conditions: true,
         show_temperature: true,
         show_forecast: true,

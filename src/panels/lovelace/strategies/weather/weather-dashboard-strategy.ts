@@ -6,7 +6,7 @@ import type { WeatherViewStrategyConfig } from "./weather-view-strategy";
 
 export interface WeatherDashboardStrategyConfig {
   type: "weather";
-  location?: string;
+  weather_entity: string;
   units?: "metric" | "imperial";
   show_forecast?: boolean;
   show_current?: boolean;
@@ -25,7 +25,7 @@ export class WeatherDashboardStrategy extends ReactiveElement {
           icon: "mdi:weather-partly-cloudy",
           strategy: {
             type: "weather",
-            location: config.location,
+            weather_entity: config.weather_entity,
             units: config.units,
             show_forecast: config.show_forecast,
             show_current: config.show_current,
