@@ -34,6 +34,7 @@ const STRATEGIES: Record<LovelaceStrategyConfigType, Record<string, any>> = {
     iframe: () => import("./iframe/iframe-dashboard-strategy"),
     areas: () => import("./areas/areas-dashboard-strategy"),
     home: () => import("./home/home-dashboard-strategy"),
+    weather: () => import("./weather/weather-dashboard-strategy"),
   },
   view: {
     "original-states": () =>
@@ -50,6 +51,7 @@ const STRATEGIES: Record<LovelaceStrategyConfigType, Record<string, any>> = {
     "home-media-players": () =>
       import("./home/home-media-players-view-strategy"),
     "home-area": () => import("./home/home-area-view-strategy"),
+    weather: () => import("./weather/weather-view-strategy"),
   },
   section: {},
 };

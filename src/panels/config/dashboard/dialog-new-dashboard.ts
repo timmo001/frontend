@@ -77,6 +77,17 @@ const STRATEGIES = [
     description:
       "ui.panel.config.lovelace.dashboards.dialog_new.strategy.iframe.description",
   },
+  {
+    type: "weather",
+    images: {
+      light:
+        "/static/images/dashboard-options/light/icon-dashboard-weather.svg",
+      dark: "/static/images/dashboard-options/dark/icon-dashboard-weather.svg",
+    },
+    name: "ui.panel.config.lovelace.dashboards.dialog_new.strategy.weather.title",
+    description:
+      "ui.panel.config.lovelace.dashboards.dialog_new.strategy.weather.description",
+  },
 ] as const satisfies Strategy[];
 
 @customElement("ha-dialog-new-dashboard")
