@@ -39,6 +39,9 @@ export const supportsWeatherForecastCardFeature = (
   return getSupportedForecastTypes(stateObj).length > 0;
 };
 
+const DEFAULT_STYLE = "icon" as const;
+const DEFAULT_FORECAST_SLOTS = 5;
+
 @customElement("hui-weather-forecast-card-feature")
 class HuiWeatherForecastCardFeature
   extends LitElement
@@ -66,6 +69,7 @@ class HuiWeatherForecastCardFeature
   static getStubConfig(): WeatherForecastCardFeatureConfig {
     return {
       type: "weather-forecast",
+      style: DEFAULT_STYLE,
     };
   }
 
@@ -79,6 +83,15 @@ class HuiWeatherForecastCardFeature
   public setConfig(config: WeatherForecastCardFeatureConfig): void {
     if (!config) {
       throw new Error("Invalid configuration");
+    }
+    if (config.style && config.style !== "icon" && config.style !== "text") {
+      throw new Error("Invalid style. Must be 'icon' or 'text'");
+    }
+    if (
+      config.forecast_slots !== undefined &&
+      (config.forecast_slots < 1 || config.forecast_slots > 12)
+    ) {
+      throw new Error("forecast_slots must be between 1 and 12");
     }
     this._config = config;
   }
@@ -173,8 +186,9 @@ class HuiWeatherForecastCardFeature
       return null;
     }
 
-    const maxItems = this._config.forecast_slots ?? 5;
+    const maxItems = this._config.forecast_slots ?? DEFAULT_FORECAST_SLOTS;
     const forecast = forecastData.forecast.slice(0, maxItems);
+    const style = this._config.style ?? DEFAULT_STYLE;
 
     return html`
       <div class="forecast-container">
@@ -202,25 +216,34 @@ class HuiWeatherForecastCardFeature
             );
           }
 
-          const weatherIcon = item.condition
-            ? getWeatherStateIcon(
-                item.condition,
-                this,
-                item.is_daytime === false
-              )
-            : nothing;
-
           const tempUnit = getWeatherUnit(
             this.hass!.config,
             this._stateObj!,
             "temperature"
           );
 
+          if (style === "icon") {
+            const weatherIcon = item.condition
+              ? getWeatherStateIcon(
+                  item.condition,
+                  this,
+                  item.is_daytime === false
+                )
+              : nothing;
+
+            return html`
+              <div class="forecast-item">
+                <div class="forecast-time">${timeLabel}</div>
+                <div class="forecast-icon">${weatherIcon}</div>
+              </div>
+            `;
+          }
+
+          // text mode
           return html`
-            <div class="forecast-item">
+            <div class="forecast-item text-mode">
               <div class="forecast-time">${timeLabel}</div>
-              <div class="forecast-icon">${weatherIcon}</div>
-              <div class="forecast-temp">
+              <div class="forecast-temps">
                 ${tempHigh != null
                   ? html`<span class="temp-high"
                       >${formatNumber(
@@ -254,6 +277,7 @@ class HuiWeatherForecastCardFeature
           display: flex;
           gap: 16px;
           overflow-x: auto;
+          overflow-y: hidden;
           padding: 0 4px;
         }
 
@@ -290,12 +314,15 @@ class HuiWeatherForecastCardFeature
           height: 40px;
         }
 
-        .forecast-temp {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          font-size: 14px;
+        .forecast-item.text-mode {
           gap: 2px;
+        }
+
+        .forecast-temps {
+          display: flex;
+          gap: 8px;
+          font-size: 14px;
+          white-space: nowrap;
         }
 
         .temp-high {

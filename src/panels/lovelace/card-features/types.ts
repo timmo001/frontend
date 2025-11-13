@@ -233,6 +233,7 @@ export interface WeatherForecastCardFeatureConfig {
   type: "weather-forecast";
   forecast_type?: ModernForecastType;
   forecast_slots?: number;
+  style?: "icon" | "text";
 }
 
 export type LovelaceCardFeaturePosition = "bottom" | "inline";

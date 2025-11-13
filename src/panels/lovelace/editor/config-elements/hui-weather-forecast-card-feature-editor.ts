@@ -54,6 +54,27 @@ export class HuiWeatherForecastCardFeatureEditor
           },
         },
         {
+          name: "style",
+          selector: {
+            select: {
+              options: [
+                {
+                  value: "icon",
+                  label: localize(
+                    "ui.panel.lovelace.editor.features.types.weather-forecast.style_list.icon"
+                  ),
+                },
+                {
+                  value: "text",
+                  label: localize(
+                    "ui.panel.lovelace.editor.features.types.weather-forecast.style_list.text"
+                  ),
+                },
+              ],
+            },
+          },
+        },
+        {
           name: "forecast_slots",
           selector: {
             number: {
@@ -98,6 +119,7 @@ export class HuiWeatherForecastCardFeatureEditor
     switch (schema.name) {
       case "forecast_type":
       case "forecast_slots":
+      case "style":
         return this.hass!.localize(
           `ui.panel.lovelace.editor.features.types.weather-forecast.${schema.name}`
         );
