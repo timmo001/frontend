@@ -24,6 +24,7 @@ import type {
   LovelaceCardFeatureContext,
   WeatherForecastCardFeatureConfig,
 } from "./types";
+import { haStyleScrollbar } from "../../../resources/styles";
 
 export const supportsWeatherForecastCardFeature = (
   hass: HomeAssistant,
@@ -191,7 +192,7 @@ class HuiWeatherForecastCardFeature
     const style = this._config.style ?? DEFAULT_STYLE;
 
     return html`
-      <div class="forecast-container">
+      <div class="forecast-container ha-scrollbar">
         ${forecast.map((item) => {
           const datetime = new Date(item.datetime);
           const tempHigh = item.temperature;
@@ -272,6 +273,7 @@ class HuiWeatherForecastCardFeature
     return [
       cardFeatureStyles,
       weatherSVGStyles,
+      haStyleScrollbar,
       css`
         .forecast-container {
           display: flex;
