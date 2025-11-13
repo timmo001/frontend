@@ -8383,6 +8383,11 @@
                   "icons": "[%key:ui::panel::lovelace::editor::features::types::climate-preset-modes::style_list::icons%]"
                 }
               },
+              "weather-forecast": {
+                "label": "Weather forecast",
+                "forecast_type": "[%key:ui::panel::lovelace::editor::card::weather-forecast::forecast_type%]",
+                "forecast_slots": "[%key:ui::panel::lovelace::editor::card::weather-forecast::forecast_slots%]"
+              },
               "lawn-mower-commands": {
                 "label": "Lawn mower commands",
                 "commands": "Commands",

@@ -1,6 +1,7 @@
 import type { AlarmMode } from "../../../data/alarm_control_panel";
 import type { HvacMode } from "../../../data/climate";
 import type { OperationMode } from "../../../data/water_heater";
+import type { ModernForecastType } from "../../../data/weather";
 
 export type ButtonCardData = Record<string, any>;
 
@@ -228,6 +229,12 @@ export interface BarGaugeCardFeatureConfig {
   type: "bar-gauge";
 }
 
+export interface WeatherForecastCardFeatureConfig {
+  type: "weather-forecast";
+  forecast_type?: ModernForecastType;
+  forecast_slots?: number;
+}
+
 export type LovelaceCardFeaturePosition = "bottom" | "inline";
 
 export type LovelaceCardFeatureConfig =
@@ -270,6 +277,7 @@ export type LovelaceCardFeatureConfig =
   | ValveOpenCloseCardFeatureConfig
   | ValvePositionCardFeatureConfig
   | WaterHeaterOperationModesCardFeatureConfig
+  | WeatherForecastCardFeatureConfig
   | AreaControlsCardFeatureConfig
   | BarGaugeCardFeatureConfig;
 

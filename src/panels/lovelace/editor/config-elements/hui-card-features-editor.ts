@@ -62,6 +62,7 @@ import { supportsValveOpenCloseCardFeature } from "../../card-features/hui-valve
 import { supportsValvePositionCardFeature } from "../../card-features/hui-valve-position-card-feature";
 import { supportsBarGaugeCardFeature } from "../../card-features/hui-bar-gauge-card-feature";
 import { supportsWaterHeaterOperationModesCardFeature } from "../../card-features/hui-water-heater-operation-modes-card-feature";
+import { supportsWeatherForecastCardFeature } from "../../card-features/hui-weather-forecast-card-feature";
 import type {
   LovelaceCardFeatureConfig,
   LovelaceCardFeatureContext,
@@ -116,6 +117,7 @@ const UI_FEATURE_TYPES = [
   "valve-open-close",
   "valve-position",
   "water-heater-operation-modes",
+  "weather-forecast",
 ] as const satisfies readonly FeatureType[];
 
 type UiFeatureTypes = (typeof UI_FEATURE_TYPES)[number];
@@ -140,6 +142,7 @@ const EDITABLES_FEATURE_TYPES = new Set<UiFeatureTypes>([
   "update-actions",
   "vacuum-commands",
   "water-heater-operation-modes",
+  "weather-forecast",
 ]);
 
 const SUPPORTS_FEATURE_TYPES: Record<
@@ -187,6 +190,7 @@ const SUPPORTS_FEATURE_TYPES: Record<
   "valve-open-close": supportsValveOpenCloseCardFeature,
   "valve-position": supportsValvePositionCardFeature,
   "water-heater-operation-modes": supportsWaterHeaterOperationModesCardFeature,
+  "weather-forecast": supportsWeatherForecastCardFeature,
 };
 
 const customCardFeatures = getCustomCardFeatures();
