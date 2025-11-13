@@ -44,8 +44,6 @@ export class HuiWeatherForecastCardFeatureEditor
           name: "forecast_type",
           selector: {
             select: {
-              multiple: false,
-              mode: "list",
               options: supportedTypes.map((type) => ({
                 value: type,
                 label: localize(
@@ -61,7 +59,6 @@ export class HuiWeatherForecastCardFeatureEditor
             number: {
               min: 1,
               max: 12,
-              mode: "box",
             },
           },
         },
